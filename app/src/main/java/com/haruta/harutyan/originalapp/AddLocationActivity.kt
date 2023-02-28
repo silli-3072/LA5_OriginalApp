@@ -2,9 +2,12 @@ package com.haruta.harutyan.originalapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.haruta.harutyan.originalapp.databinding.ActivityAddLocationBinding
@@ -24,12 +27,14 @@ class AddLocationActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-       //マーカーを追加
-        googleMap.addMarker(
-            //マーカーの設定
-            MarkerOptions()
-                .position(LatLng(36.0, 140.0))
-                .title("Marker")
-        )
+        //長押しされた時のActionを指示
+        googleMap.setOnMapClickListener { longpushLocation: LatLng ->
+            var newlocation = LatLng(longpushLocation.latitude, longpushLocation.longitude)
+            googleMap.addMarker(
+                MarkerOptions().position(newlocation)
+            )
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newlocation, 14f))
+        }
+
     }
 }
