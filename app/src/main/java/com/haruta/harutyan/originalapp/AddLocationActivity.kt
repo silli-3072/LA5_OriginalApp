@@ -27,6 +27,14 @@ class AddLocationActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        val nagoya = LatLng( 35.1814,136.9063)
+        //起動時の表示場所を設定
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(nagoya))
+        //起動時の縮尺を設定
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(nagoya,15f))
+        //拡大・縮小ボタンを表示
+        googleMap.uiSettings.isZoomControlsEnabled = true
+
         //長押しされた時のActionを指示
         googleMap.setOnMapClickListener { longpushLocation: LatLng ->
             var newlocation = LatLng(longpushLocation.latitude, longpushLocation.longitude)
