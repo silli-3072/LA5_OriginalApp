@@ -35,6 +35,8 @@ class AddLocationActivity : AppCompatActivity(), OnMapReadyCallback {
         //拡大・縮小ボタンを表示
         googleMap.uiSettings.isZoomControlsEnabled = true
 
+        //googleMap.uiSettings.isMyLocationButtonEnabled = true
+
         //長押しされた時のActionを指示
         googleMap.setOnMapClickListener { longpushLocation: LatLng ->
             var newlocation = LatLng(longpushLocation.latitude, longpushLocation.longitude)
