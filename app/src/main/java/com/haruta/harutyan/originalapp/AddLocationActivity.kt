@@ -20,6 +20,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.haruta.harutyan.originalapp.databinding.ActivityAddLocationBinding
+import com.haruta.harutyan.originalapp.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
+import com.haruta.harutyan.originalapp.PermissionUtils.isPermissionGranted
 
 class AddLocationActivity : AppCompatActivity(),
     GoogleMap.OnMyLocationButtonClickListener,
@@ -66,7 +68,6 @@ class AddLocationActivity : AppCompatActivity(),
 
     }
 
-    @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
 
         // 1. Check if permissions are granted, if so, enable the my location layer
