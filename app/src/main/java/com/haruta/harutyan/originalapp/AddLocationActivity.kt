@@ -1,7 +1,6 @@
 package com.haruta.harutyan.originalapp
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
@@ -11,12 +10,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener
-import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener
-import com.google.android.gms.maps.GoogleMap.OnMyLocationClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.haruta.harutyan.originalapp.databinding.ActivityAddLocationBinding
@@ -45,6 +40,13 @@ class AddLocationActivity : AppCompatActivity(),
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        //初期化の遅延
+        map = googleMap
+
+        googleMap.setOnMyLocationButtonClickListener(this)
+        googleMap.setOnMyLocationClickListener(this)
+        enableMyLocation()
+
         val nagoya = LatLng( 35.1814,136.9063)
         //起動時の表示場所を設定
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(nagoya))
@@ -52,10 +54,6 @@ class AddLocationActivity : AppCompatActivity(),
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(nagoya,15f))
         //拡大・縮小ボタンを表示
         googleMap.uiSettings.isZoomControlsEnabled = true
-
-        googleMap.setOnMyLocationButtonClickListener(this)
-        googleMap.setOnMyLocationClickListener(this)
-        enableMyLocation()
 
         //長押しされた時のActionを指示
         googleMap.setOnMapClickListener { longpushLocation: LatLng ->
@@ -69,8 +67,6 @@ class AddLocationActivity : AppCompatActivity(),
     }
 
     private fun enableMyLocation() {
-
-        // 1. Check if permissions are granted, if so, enable the my location layer
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -123,7 +119,7 @@ class AddLocationActivity : AppCompatActivity(),
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
             super.onRequestPermissionsResult(
