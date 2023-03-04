@@ -37,6 +37,10 @@ class AddLocationActivity : AppCompatActivity(),
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        binding.saveFav.setOnClickListener {
+            finish()
+        }
+
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -53,6 +57,7 @@ class AddLocationActivity : AppCompatActivity(),
         //起動時の縮尺を設定
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(nagoya,15f))
         //拡大・縮小ボタンを表示
+        //実機で地図の拡大がしにくいので実装。リリース時には消す
         googleMap.uiSettings.isZoomControlsEnabled = true
 
         //長押しされた時のActionを指示
