@@ -25,6 +25,7 @@ class AddLocationActivity : AppCompatActivity(),
 
     private lateinit var binding: ActivityAddLocationBinding
     private lateinit var map: GoogleMap
+    lateinit var db: AppDatabase
 
     private var permissionDenied = false
 
@@ -37,7 +38,19 @@ class AddLocationActivity : AppCompatActivity(),
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        binding.saveFav.setOnClickListener {
+        // 2. データベースの初期化
+        db = AppDatabase.getInstance(this.applicationContext)!!
+
+        binding.saveFab.setOnClickListener {
+            //保存するデータの変数を作成
+            val user: locationRoom.User = locationRoom.User(
+                latitude = Float,
+                longitude = Float,
+            )
+            //Daoのinsertを呼び出して保存したいUserを渡す
+            db.userDao().insert(user)
+
+
             finish()
         }
 

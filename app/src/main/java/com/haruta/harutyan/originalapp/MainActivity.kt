@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
 
         val addLocationIntent: Intent = Intent(this, AddLocationActivity::class.java)
 
-        binding.transitionFav.setOnClickListener {
+        binding.transitionFab.setOnClickListener {
             startActivity(addLocationIntent)
         }
 

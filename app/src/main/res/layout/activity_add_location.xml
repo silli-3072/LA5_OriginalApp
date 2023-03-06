@@ -14,7 +14,7 @@
         tools:layout="@layout/fragment_dummy_layout" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/save_fav"
+        android:id="@+id/save_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
