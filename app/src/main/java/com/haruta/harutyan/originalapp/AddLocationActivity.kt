@@ -2,10 +2,9 @@ package com.haruta.harutyan.originalapp
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -14,9 +13,9 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.haruta.harutyan.originalapp.databinding.ActivityAddLocationBinding
 import com.haruta.harutyan.originalapp.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
 import com.haruta.harutyan.originalapp.PermissionUtils.isPermissionGranted
+import com.haruta.harutyan.originalapp.databinding.ActivityAddLocationBinding
 
 class AddLocationActivity : AppCompatActivity(),
     GoogleMap.OnMyLocationButtonClickListener,
@@ -25,19 +24,42 @@ class AddLocationActivity : AppCompatActivity(),
 
     private lateinit var binding: ActivityAddLocationBinding
     private lateinit var map: GoogleMap
+    lateinit var db: AppDatabase
 
     private var permissionDenied = false
 
+    //保存用の緯度・経度の変数
+    private var latitude = -1.0
+    private var longitude = -1.0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAddLocationBinding.inflate(layoutInflater).apply { setContentView(this.root) }
+        binding =
+            ActivityAddLocationBinding.inflate(layoutInflater).apply { setContentView(this.root) }
 
         //フラグメントに対するハンドルを取得してコールバックを登録
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        // 2. データベースの初期化
+        db = AppDatabase.getInstance(this.applicationContext)!!
+
+        binding.saveFab.setOnClickListener {
+            //保存するデータの変数を作成
+            val location: Location = Location(
+                name = "",
+                latitude = latitude,
+                longitude = longitude,
+            )
+            //Daoのinsertを呼び出して保存したいUserを渡す
+            db.locationDao().insert(location)
+
+            finish()
+        }
+
     }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         //初期化の遅延
@@ -47,13 +69,21 @@ class AddLocationActivity : AppCompatActivity(),
         googleMap.setOnMyLocationClickListener(this)
         enableMyLocation()
 
-        val nagoya = LatLng( 35.1814,136.9063)
+        val nagoya = LatLng(35.1814, 136.9063)
         //起動時の表示場所を設定
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(nagoya))
         //起動時の縮尺を設定
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(nagoya,15f))
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(nagoya, 15f))
         //拡大・縮小ボタンを表示
+        //実機で地図の拡大がしにくいので実装。リリース時には消す
         googleMap.uiSettings.isZoomControlsEnabled = true
+
+        //エミュレーターでピンが打ちづらいので、あらかじめ設定。リリース時には消す
+        googleMap.addMarker(
+            MarkerOptions()
+                .position(nagoya)
+        )
+
 
         //長押しされた時のActionを指示
         googleMap.setOnMapClickListener { longpushLocation: LatLng ->
@@ -62,6 +92,12 @@ class AddLocationActivity : AppCompatActivity(),
                 MarkerOptions().position(newlocation)
             )
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newlocation, 14f))
+        }
+
+        //ピンのクリックを取得
+        googleMap.setOnMapClickListener {
+            latitude = it.latitude
+            longitude = it.longitude
         }
 
     }
@@ -111,7 +147,7 @@ class AddLocationActivity : AppCompatActivity(),
         return false
     }
 
-    override fun onMyLocationClick(location: Location) {
+    override fun onMyLocationClick(location: android.location.Location) {
         Toast.makeText(this, "Current location:\n$location", Toast.LENGTH_LONG)
             .show()
     }
