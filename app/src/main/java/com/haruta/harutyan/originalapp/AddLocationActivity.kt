@@ -12,6 +12,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.haruta.harutyan.originalapp.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
 import com.haruta.harutyan.originalapp.PermissionUtils.isPermissionGranted
@@ -24,6 +25,7 @@ class AddLocationActivity : AppCompatActivity(),
 
     private lateinit var binding: ActivityAddLocationBinding
     private lateinit var map: GoogleMap
+    private var marker: Marker? = null
     lateinit var db: AppDatabase
 
     private var permissionDenied = false
@@ -57,9 +59,7 @@ class AddLocationActivity : AppCompatActivity(),
 
             finish()
         }
-
     }
-
 
     override fun onMapReady(googleMap: GoogleMap) {
         //初期化の遅延
@@ -79,19 +79,21 @@ class AddLocationActivity : AppCompatActivity(),
         googleMap.uiSettings.isZoomControlsEnabled = true
 
         //エミュレーターでピンが打ちづらいので、あらかじめ設定。リリース時には消す
-        googleMap.addMarker(
-            MarkerOptions()
-                .position(nagoya)
-        )
-
+        // googleMap.addMarker(
+        //     MarkerOptions()
+        //         .position(nagoya)
+        // )
 
         //長押しされた時のActionを指示
-        googleMap.setOnMapClickListener { longpushLocation: LatLng ->
+        googleMap.setOnMapLongClickListener { longpushLocation: LatLng ->
+            marker?.remove()
+
             val newlocation = LatLng(longpushLocation.latitude, longpushLocation.longitude)
-            googleMap.addMarker(
+            marker = googleMap.addMarker(
                 MarkerOptions().position(newlocation)
             )
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newlocation, 14f))
+
+            //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newlocation, 1f))
         }
 
         //ピンのクリックを取得
@@ -99,7 +101,6 @@ class AddLocationActivity : AppCompatActivity(),
             latitude = it.latitude
             longitude = it.longitude
         }
-
     }
 
     private fun enableMyLocation() {
@@ -196,6 +197,5 @@ class AddLocationActivity : AppCompatActivity(),
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
-
     }
 }
