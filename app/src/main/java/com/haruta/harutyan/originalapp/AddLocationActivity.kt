@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -46,16 +47,23 @@ class AddLocationActivity : AppCompatActivity(),
         db = AppDatabase.getInstance(this.applicationContext)!!
 
         binding.saveFab.setOnClickListener {
-            //保存するデータの変数を作成
-            val location: Location = Location(
-                name = "",
-                latitude = latitude,
-                longitude = longitude,
-            )
-            //Daoのinsertを呼び出して保存したいUserを渡す
-            db.locationDao().insert(location)
-
-            finish()
+            AlertDialog.Builder(this)
+                .setTitle("地点を登録します")
+                .setPositiveButton("OK"){ dialog, which ->
+                    //保存するデータの変数を作成
+                    val location: Location = Location(
+                    name = "",
+                    latitude = latitude,
+                    longitude = longitude,
+                    )
+                    //Daoのinsertを呼び出して保存したいUserを渡す
+                    db.locationDao().insert(location)
+                    finish()
+                }
+                .setNegativeButton("キャンセル"){  dialog, which ->
+                    finish()
+                }
+                .show()
         }
 
     }
