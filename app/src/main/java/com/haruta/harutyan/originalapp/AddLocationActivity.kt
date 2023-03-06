@@ -35,8 +35,7 @@ class AddLocationActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding =
-            ActivityAddLocationBinding.inflate(layoutInflater).apply { setContentView(this.root) }
+        binding = ActivityAddLocationBinding.inflate(layoutInflater).apply { setContentView(this.root) }
 
         //フラグメントに対するハンドルを取得してコールバックを登録
         val mapFragment = supportFragmentManager
@@ -52,9 +51,9 @@ class AddLocationActivity : AppCompatActivity(),
                 .setPositiveButton("OK"){ dialog, which ->
                     //保存するデータの変数を作成
                     val location: Location = Location(
-                    name = "",
-                    latitude = latitude,
-                    longitude = longitude,
+                        name = "",
+                        latitude = latitude,
+                        longitude = longitude,
                     )
                     //Daoのinsertを呼び出して保存したいUserを渡す
                     db.locationDao().insert(location)
