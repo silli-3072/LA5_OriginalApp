@@ -32,7 +32,8 @@ class AddLocationActivity : AppCompatActivity(),
 
     private  var marker: Marker? = null
 
-    //保存用の緯度・経度の変数
+    //保存用の地名・緯度・経度の変数
+    private var name = "名称未設定"
     private var latitude = -1.0
     private var longitude = -1.0
 
@@ -50,12 +51,14 @@ class AddLocationActivity : AppCompatActivity(),
         db = AppDatabase.getInstance(this.applicationContext)!!
 
         binding.saveFab.setOnClickListener {
+            name = binding.locationNameTextEdit.text.toString()
+
             AlertDialog.Builder(this)
-                .setTitle("地点を登録します")
+                .setTitle("${name}を登録します")
                 .setPositiveButton("OK"){ dialog, which ->
                     //保存するデータの変数を作成
                     val location: Location = Location(
-                    name = "",
+                    name = name,
                     latitude = latitude,
                     longitude = longitude,
                     )
