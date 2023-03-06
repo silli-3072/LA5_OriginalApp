@@ -59,9 +59,7 @@ class AddLocationActivity : AppCompatActivity(),
                     db.locationDao().insert(location)
                     finish()
                 }
-                .setNegativeButton("キャンセル"){  dialog, which ->
-                    finish()
-                }
+                .setNegativeButton("キャンセル"){  dialog, which -> }
                 .show()
         }
 
