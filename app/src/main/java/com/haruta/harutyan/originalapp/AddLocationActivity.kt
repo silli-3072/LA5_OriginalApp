@@ -2,7 +2,6 @@ package com.haruta.harutyan.originalapp
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -43,18 +42,19 @@ class AddLocationActivity : AppCompatActivity(),
 
         binding.saveFab.setOnClickListener {
             //保存するデータの変数を作成
-            val user: locationRoom.User = locationRoom.User(
+            val location: Location = Location(
                 latitude = Float,
                 longitude = Float,
             )
             //Daoのinsertを呼び出して保存したいUserを渡す
-            db.userDao().insert(user)
+            db.locationDao().insert(location)
 
 
             finish()
         }
 
     }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         //初期化の遅延

@@ -7,28 +7,28 @@ import androidx.room.Query
 import androidx.room.Update
 
 @Dao
-interface UserDao {
+interface LocationDao {
     // データを追加
     @Insert
-    fun insert(location: locationRoom.User)
+    fun insert(location: Location)
 
     // データを更新
     @Update
-    fun update(location: locationRoom.User)
+    fun update(location: Location)
 
     // データを削除
     @Delete
-    fun delete(location: locationRoom.User)
+    fun delete(location: Location)
 
     // 全てのデータを取得
-    @Query("select * from location")
-    fun getAll(): List<locationRoom.User>
+    @Query("select * from locations")
+    fun getAll(): List<Location>
 
     // 全てのデータを削除
-    @Query("delete from location")
+    @Query("delete from locations")
     fun deleteAll()
 
     // UserのuidがidのUserを取得
-    @Query("select * from location where uid = :id")
-    fun getUser(id: Int): locationRoom.User
+    @Query("select * from locations where uid = :id")
+    fun getUser(id: Int): Location
 }
