@@ -13,6 +13,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.haruta.harutyan.originalapp.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
 import com.haruta.harutyan.originalapp.PermissionUtils.isPermissionGranted
@@ -28,6 +29,8 @@ class AddLocationActivity : AppCompatActivity(),
     lateinit var db: AppDatabase
 
     private var permissionDenied = false
+
+    private  var marker: Marker? = null
 
     //保存用の緯度・経度の変数
     private var latitude = -1.0
@@ -86,17 +89,12 @@ class AddLocationActivity : AppCompatActivity(),
         //実機で地図の拡大がしにくいので実装。リリース時には消す
         googleMap.uiSettings.isZoomControlsEnabled = true
 
-        //エミュレーターでピンが打ちづらいので、あらかじめ設定。リリース時には消す
-        googleMap.addMarker(
-            MarkerOptions()
-                .position(nagoya)
-        )
-
-
         //長押しされた時のActionを指示
-        googleMap.setOnMapClickListener { longpushLocation: LatLng ->
+        googleMap.setOnMapLongClickListener { longpushLocation: LatLng ->
+            marker?.remove()
+
             val newlocation = LatLng(longpushLocation.latitude, longpushLocation.longitude)
-            googleMap.addMarker(
+            marker = googleMap.addMarker(
                 MarkerOptions().position(newlocation)
             )
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newlocation, 14f))
