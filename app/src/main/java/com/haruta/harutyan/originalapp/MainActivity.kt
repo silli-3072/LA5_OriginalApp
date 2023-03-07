@@ -12,10 +12,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        db = AppDatabase.getInstance(this.applicationContext)!!
-        locationList = db.locationDao().getAll()
-        Log.d("room",locationList[0].name.toString())
-
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(this.root) }
 
         val addLocationIntent: Intent = Intent(this, AddLocationActivity::class.java)
