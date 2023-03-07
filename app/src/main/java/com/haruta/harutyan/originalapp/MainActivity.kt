@@ -8,9 +8,7 @@ import com.haruta.harutyan.originalapp.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    lateinit var db: AppDatabase
 
-    var locationList: List<Location> = emptyList()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
