@@ -20,7 +20,7 @@
         android:layout_marginBottom="30dp"
         android:textSize="30sp"
         android:inputType="textPersonName"
-        android:text="登録名"
+        android:hint="登録名"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
