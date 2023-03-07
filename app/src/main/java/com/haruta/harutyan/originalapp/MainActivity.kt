@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
 
         db = AppDatabase.getInstance(this.applicationContext)!!
         locationList = db.locationDao().getAll()
-        Log.d("room",locationList.size.toString())
+        Log.d("room",locationList[0].name.toString())
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(this.root) }
 

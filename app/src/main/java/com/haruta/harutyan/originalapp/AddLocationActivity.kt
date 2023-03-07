@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -12,6 +13,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.haruta.harutyan.originalapp.PermissionUtils.PermissionDeniedDialog.Companion.newInstance
 import com.haruta.harutyan.originalapp.PermissionUtils.isPermissionGranted
@@ -28,7 +30,10 @@ class AddLocationActivity : AppCompatActivity(),
 
     private var permissionDenied = false
 
-    //保存用の緯度・経度の変数
+    private  var marker: Marker? = null
+
+    //保存用の地名・緯度・経度の変数
+    private var name = "名称未設定"
     private var latitude = -1.0
     private var longitude = -1.0
 
@@ -46,16 +51,25 @@ class AddLocationActivity : AppCompatActivity(),
         db = AppDatabase.getInstance(this.applicationContext)!!
 
         binding.saveFab.setOnClickListener {
-            //保存するデータの変数を作成
-            val location: Location = Location(
-                name = "",
-                latitude = latitude,
-                longitude = longitude,
-            )
-            //Daoのinsertを呼び出して保存したいUserを渡す
-            db.locationDao().insert(location)
+            name = binding.locationNameTextEdit.text.toString()
 
-            finish()
+            AlertDialog.Builder(this)
+                .setTitle("${name}を登録します")
+                .setPositiveButton("OK"){ dialog, which ->
+                    //保存するデータの変数を作成
+                    val location: Location = Location(
+                        name = name,
+                        latitude = latitude,
+                        longitude = longitude,
+                    )
+                    //Daoのinsertを呼び出して保存したいUserを渡す
+                    db.locationDao().insert(location)
+                    finish()
+                }
+                .setNegativeButton("キャンセル"){  dialog, which ->
+
+                }
+                .show()
         }
 
     }
@@ -78,17 +92,12 @@ class AddLocationActivity : AppCompatActivity(),
         //実機で地図の拡大がしにくいので実装。リリース時には消す
         googleMap.uiSettings.isZoomControlsEnabled = true
 
-        //エミュレーターでピンが打ちづらいので、あらかじめ設定。リリース時には消す
-        googleMap.addMarker(
-            MarkerOptions()
-                .position(nagoya)
-        )
-
-
         //長押しされた時のActionを指示
-        googleMap.setOnMapClickListener { longpushLocation: LatLng ->
+        googleMap.setOnMapLongClickListener { longpushLocation: LatLng ->
+            marker?.remove()
+
             val newlocation = LatLng(longpushLocation.latitude, longpushLocation.longitude)
-            googleMap.addMarker(
+            marker = googleMap.addMarker(
                 MarkerOptions().position(newlocation)
             )
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newlocation, 14f))
