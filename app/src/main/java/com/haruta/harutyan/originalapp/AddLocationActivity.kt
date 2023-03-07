@@ -51,7 +51,7 @@ class AddLocationActivity : AppCompatActivity(),
                 .setPositiveButton("OK"){ dialog, which ->
                     //保存するデータの変数を作成
                     val location: Location = Location(
-                        name = "",
+                        name = name,
                         latitude = latitude,
                         longitude = longitude,
                     )
@@ -59,7 +59,9 @@ class AddLocationActivity : AppCompatActivity(),
                     db.locationDao().insert(location)
                     finish()
                 }
-                .setNegativeButton("キャンセル"){  dialog, which -> }
+                .setNegativeButton("キャンセル"){  dialog, which ->
+
+                }
                 .show()
         }
 
