@@ -39,8 +39,7 @@ class AddLocationActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding =
-            ActivityAddLocationBinding.inflate(layoutInflater).apply { setContentView(this.root) }
+        binding = ActivityAddLocationBinding.inflate(layoutInflater).apply { setContentView(this.root) }
 
         //フラグメントに対するハンドルを取得してコールバックを登録
         val mapFragment = supportFragmentManager

@@ -28,7 +28,7 @@ interface LocationDao {
     @Query("delete from locations")
     fun deleteAll()
 
-    // UserのuidがidのUserを取得
+    // locationのuidがidのUserを取得
     @Query("select * from locations where uid = :id")
-    fun getUser(id: Int): Location
+    fun getLocation(id: Int): Location
 }
