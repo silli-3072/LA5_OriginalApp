@@ -14,6 +14,9 @@ import com.haruta.harutyan.originalapp.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
 
+    lateinit var db: AppDatabase
+    var userList: List<Location> = emptyList()
+
     // SensorManager
     private lateinit var sensorManager: SensorManager
 
@@ -30,6 +33,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(this.root) }
+
+        db = AppDatabase.getInstance(this.applicationContext)!!
+        userList = db.locationDao().getAll()
 
         // SensorManagerのインスタンスを生成
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
