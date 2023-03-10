@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun drawCompass(degreeDir: Float) {
-        binding.southImage.setRotationX(degreeDir)
+        binding.southImage.setRotation(degreeDir)
 
     }
 }
