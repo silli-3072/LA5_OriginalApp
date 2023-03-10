@@ -19,15 +19,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
 
     // Sensor
-    private var mAccelerometerSensor: Sensor? = null
-    private var mMagneticFieldSensor: Sensor? = null
-
-    // Sensorの値
-    private var mAccelerometerValue: FloatArray = FloatArray(3)
-    private var mMagneticFieldValue: FloatArray = FloatArray(5)
-
-    // 一度でも地磁気センサーの値を取得したか
-    private var mMagneticFiledFlg: Boolean = false
+    private lateinit var mAccelerometerSensor: Sensor
+    private lateinit var mMagneticFieldSensor: Sensor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +51,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     // センサーの値が変化した時の処理
     override fun onSensorChanged(event: SensorEvent?) {
+        var mAccelerometerValue: FloatArray = FloatArray(3)
+        var mMagneticFieldValue: FloatArray = FloatArray(5)
+
+        var mMagneticFiledFlg: Boolean = false
+
         if (event != null) {
             // 値が変わったセンサーの値を保存する
             when (event.sensor.type) {
