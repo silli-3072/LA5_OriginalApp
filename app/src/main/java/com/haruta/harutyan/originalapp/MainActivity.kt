@@ -29,8 +29,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     // 一度でも地磁気センサーの値を取得したか
     private var mMagneticFiledFlg: Boolean = false
 
-    lateinit var tmpMatrix: Matrix
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,8 +42,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         // 地磁気センサーを取得する
         mMagneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-
-        tmpMatrix = binding.southImage.imageMatrix
 
         val addLocationIntent: Intent = Intent(this, AddLocationActivity::class.java)
 
@@ -107,6 +103,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             // とりあえず値を出力してみる
             Log.d("DEGREE", degree.toString())
+
+            drawCompass(degree)
         }
 
     }
@@ -138,11 +136,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun drawCompass(degreeDir: Float) {
-        tmpMatrix.reset()
-        // 角度分回転させる(ImageViewの中心で回転)
-        tmpMatrix.postRotate(degreeDir, binding.southImage.width * 0.5f, binding.southImage.height * 0.5f)
-        // 行列を適用
-        binding.southImage.imageMatrix = tmpMatrix
-        binding.southImage.invalidate()
+        binding.southImage.setRotationX(degreeDir)
+
     }
 }
