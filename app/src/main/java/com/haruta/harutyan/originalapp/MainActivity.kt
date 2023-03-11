@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         var mMagneticFieldValue: FloatArray = FloatArray(5)
 
         var mMagneticFiledFlg: Boolean = false
-
+        
         if (event != null) {
             // 値が変わったセンサーの値を保存する
             when (event.sensor.type) {
