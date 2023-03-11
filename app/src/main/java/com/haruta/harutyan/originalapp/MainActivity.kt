@@ -10,12 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.haruta.harutyan.originalapp.databinding.ActivityMainBinding
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
-
-    lateinit var db: AppDatabase
-    var userList: List<Location> = emptyList()
 
     // SensorManager
     private lateinit var sensorManager: SensorManager
@@ -33,9 +33,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(this.root) }
-
-        db = AppDatabase.getInstance(this.applicationContext)!!
-        userList = db.locationDao().getAll()
 
         // SensorManagerのインスタンスを生成
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -151,5 +148,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun rotateCompass(degree: Float) {
         // Viewの回転方向と方位の回転方向が逆なので、マイナスをかけて反転する
         binding.southImage.rotation = -degree
+    }
+
+    private fun directionCalculation() {
+        lateinit var db: AppDatabase
+        var locationList: List<Location> = emptyList()
+
+        db = AppDatabase.getInstance(this.applicationContext)!!
+        locationList = db.locationDao().getAll()
+
+        val selectNumber: Int = 0
+        val latitudePoint:Double = locationList[selectNumber].latitude
+        val latitudeCurrentLocation:Double =  取得する
+        val latitudeDifference = latitudePoint - latitudeCurrentLocation
+
+        var directionCalculationNumber: Double = (cos(latitudePoint) * sin(latitudeDifference)) - (sin(latitudeCurrentLocation) * cos(latitudePoint) * cos(latitudeDifference)) + (cos(latitudePoint) * sin(latitudePoint))
+        var absoluteValue = abs(directionCalculationNumber)
     }
 }
