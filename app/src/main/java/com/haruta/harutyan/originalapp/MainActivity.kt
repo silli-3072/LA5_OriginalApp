@@ -157,12 +157,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         db = AppDatabase.getInstance(this.applicationContext)!!
         locationList = db.locationDao().getAll()
 
-        val selectNumber: Int = 0
-        val latitudePoint:Double = locationList[selectNumber].latitude
+        val countNumber: Int = locationList.size
         val latitudeCurrentLocation:Double =  取得する
-        val latitudeDifference = latitudePoint - latitudeCurrentLocation
 
-        var directionCalculationNumber: Double = (cos(latitudePoint) * sin(latitudeDifference)) - (sin(latitudeCurrentLocation) * cos(latitudePoint) * cos(latitudeDifference)) + (cos(latitudePoint) * sin(latitudePoint))
-        var absoluteValue = abs(directionCalculationNumber)
+        var arrayList: ArrayList<Double> = ArrayList()
+
+        for (i in 0..countNumber) {
+            var latitudePoint:Double = locationList[i].latitude
+            var latitudeDifference = latitudePoint - latitudeCurrentLocation
+
+            var directionCalculationNumber: Double = (cos(latitudePoint) * sin(latitudeDifference)) - (sin(latitudeCurrentLocation) * cos(latitudePoint) * cos(latitudeDifference)) + (cos(latitudePoint) * sin(latitudePoint))
+            var absoluteValue = abs(directionCalculationNumber)
+
+            arrayList.add(absoluteValue)
+        }
     }
 }
