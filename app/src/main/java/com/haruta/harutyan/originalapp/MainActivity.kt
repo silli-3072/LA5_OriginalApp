@@ -98,11 +98,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             // 角度を求める
             val doubleOrientation = orientation[0].toDouble()
             val degree = Math.toDegrees(doubleOrientation).toFloat()
+            val magnetic = windowManager.defaultDisplay.rotation
 
-            // とりあえず値を出力してみる
+                // とりあえず値を出力してみる
             Log.d("DEGREE", degree.toString())
 
-            drawCompass(degree)
+            drawCompass(degree, magnetic)
         }
 
     }
@@ -133,8 +134,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         sensorManager.unregisterListener(this@MainActivity)
     }
 
-    private fun drawCompass(degreeDir: Float) {
-        binding.southImage.setRotation(degreeDir)
+    private fun drawCompass(degreeDir: Float,magneticDir: Float) {
+        var setCompass = degreeDir - magneticDir
+        binding.southImage.setRotation(setCompass)
 
     }
 }
