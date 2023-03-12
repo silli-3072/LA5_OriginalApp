@@ -2,7 +2,6 @@ package com.haruta.harutyan.originalapp
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Matrix
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -13,6 +12,7 @@ import android.util.Log
 import com.haruta.harutyan.originalapp.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
+
     private lateinit var binding: ActivityMainBinding
 
     // SensorManager
@@ -22,10 +22,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var mAccelerometerSensor: Sensor
     private lateinit var mMagneticFieldSensor: Sensor
 
+    // Sensorの値
+    private var mAccelerometerValue: FloatArray = FloatArray(3)
+    private var mMagneticFieldValue: FloatArray = FloatArray(5)
+
+    // 一度でも地磁気センサーの値を取得したか
+    private var mMagneticFiledFlg: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(this.root) }
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // SensorManagerのインスタンスを生成
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -37,11 +44,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         mMagneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
         val addLocationIntent: Intent = Intent(this, AddLocationActivity::class.java)
-
         binding.transitionFab.setOnClickListener {
             startActivity(addLocationIntent)
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
+
+        // リスナーをセットする
+        setSensorEventListener()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        // リスナーを解除する
+        sensorManager.unregisterListener(this@MainActivity)
     }
 
     // センサーの精度が変化した時の処理
@@ -51,61 +70,80 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     // センサーの値が変化した時の処理
     override fun onSensorChanged(event: SensorEvent?) {
-        var mAccelerometerValue: FloatArray = FloatArray(3)
-        var mMagneticFieldValue: FloatArray = FloatArray(5)
-
-        var mMagneticFiledFlg: Boolean = false
-        
         if (event != null) {
-            // 値が変わったセンサーの値を保存する
-            when (event.sensor.type) {
-                Sensor.TYPE_ACCELEROMETER -> {
-                    if (event.values != null) {
-                        mAccelerometerValue = event.values.clone()
-                    }
+            holdSensorEventValues(event)
+
+            // 地磁気センサーの値を取得できている場合のみ処理をする
+            if (mMagneticFiledFlg) {
+                val degree = calculateDegree()
+                Log.d("DEGREE", "$degree")
+
+                rotateCompass(calculateDegree())
+            }
+        }
+    }
+
+    private fun setSensorEventListener() {
+        // SensorManagerにリスナーをセットする
+        // リスナー：センサーの値が変化したときに何の処理をするかを定義したインスタンス
+        mAccelerometerSensor.also { sensor: Sensor ->
+            sensorManager.registerListener(
+                this@MainActivity,
+                sensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
+        }
+        mMagneticFieldSensor.also { sensor: Sensor ->
+            sensorManager.registerListener(
+                this@MainActivity,
+                sensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
+        }
+    }
+
+    private fun holdSensorEventValues(event: SensorEvent) {
+        // 値が変わったセンサーの値を保存する
+        when (event.sensor.type) {
+            Sensor.TYPE_ACCELEROMETER -> {
+                if (event.values != null) {
+                    mAccelerometerValue = event.values
                 }
-                Sensor.TYPE_MAGNETIC_FIELD -> {
-                    if (event.values != null) {
-                        mMagneticFieldValue = event.values.clone()
-                        mMagneticFiledFlg = true
-                    }
+            }
+            Sensor.TYPE_MAGNETIC_FIELD -> {
+                if (event.values != null) {
+                    mMagneticFieldValue = event.values
+                    mMagneticFiledFlg = true
                 }
             }
         }
-        // 地磁気センサーの値を取得できている場合のみ処理をする
-        if (mMagneticFiledFlg) {
-            // 方位を出すための変換行列
-            val rotate = FloatArray(16)
-            val inclination = FloatArray(16)
+    }
 
-            // 回転角
-            val orientation = FloatArray(3)
+    private fun calculateDegree(): Float {
+        // 方位を出すための変換行列
+        val rotate = FloatArray(16)
+        val inclination = FloatArray(16)
 
-            // 行列化
-            SensorManager.getRotationMatrix(
-                rotate,
-                inclination,
-                mAccelerometerValue,
-                mMagneticFieldValue
-            )
+        // 回転角
+        val orientation = FloatArray(3)
 
-            // 回転角を取得
-            SensorManager.getOrientation(
-                rotate,
-                orientation
-            )
+        // 行列化
+        SensorManager.getRotationMatrix(
+            rotate,
+            inclination,
+            mAccelerometerValue,
+            mMagneticFieldValue
+        )
 
-            // 角度を求める
-            val doubleOrientation = orientation[0].toDouble()
-            val degree = Math.toDegrees(doubleOrientation).toFloat()
-            val magnetic = windowManager.defaultDisplay.rotation
+        // 回転角を取得
+        SensorManager.getOrientation(
+            rotate,
+            orientation
+        )
 
-                // とりあえず値を出力してみる
-            Log.d("DEGREE", degree.toString())
-
-            drawCompass(degree, magnetic)
-        }
-
+        // 角度を求める
+        val doubleOrientation = orientation[0].toDouble()
+        return Math.toDegrees(doubleOrientation).toFloat()
     }
 
     override fun onResume() {
