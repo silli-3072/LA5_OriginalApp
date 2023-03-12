@@ -146,35 +146,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         return Math.toDegrees(doubleOrientation).toFloat()
     }
 
-    override fun onResume() {
-        super.onResume()
-        // SensorManagerにリスナーをセットする
-        // リスナー：センサーの値が変化したときに何の処理をするかを定義したインスタンス
-        mAccelerometerSensor?.also { sensor: Sensor ->
-            sensorManager.registerListener(
-                this@MainActivity,
-                sensor,
-                SensorManager.SENSOR_DELAY_NORMAL
-            )
-        }
-        mMagneticFieldSensor?.also { sensor: Sensor ->
-            sensorManager.registerListener(
-                this@MainActivity,
-                sensor,
-                SensorManager.SENSOR_DELAY_NORMAL
-            )
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        // リスナーを解除する
-        sensorManager.unregisterListener(this@MainActivity)
-    }
-
-    private fun drawCompass(degreeDir: Float,magneticDir: Float) {
-        var setCompass = degreeDir - magneticDir
-        binding.southImage.setRotation(setCompass)
-
+    private fun rotateCompass(degree: Float) {
+        // Viewの回転方向と方位の回転方向が逆なので、マイナスをかけて反転する
+        binding.southImage.rotation = -degree
     }
 }
