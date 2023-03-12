@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // 地磁気センサーを取得する
         mMagneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
-        val addLocationIntent: Intent = Intent(this, AddLocationActivity::class.java)
+        val addLocationIntent = Intent(this, AddLocationActivity::class.java)
         binding.transitionFab.setOnClickListener {
             startActivity(addLocationIntent)
         }
