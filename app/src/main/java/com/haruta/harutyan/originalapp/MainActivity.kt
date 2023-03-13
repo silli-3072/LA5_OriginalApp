@@ -1,14 +1,23 @@
 package com.haruta.harutyan.originalapp
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.LocationListener
+import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.haruta.harutyan.originalapp.databinding.ActivityMainBinding
 import kotlin.math.abs
 import kotlin.math.cos
@@ -29,10 +38,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var mMagneticFiledFlg: Boolean = false
 
+    private lateinit var locationManager: LocationManager
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // 使用が許可された
+            locationStart()
+
+        } else {
+            // それでも拒否された時の対応
+            val toast = Toast.makeText(this,
+                "これ以上なにもできません", Toast.LENGTH_SHORT)
+            toast.show()
+
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(this.root) }
+
+        val location = Location
 
         // SensorManagerのインスタンスを生成
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -44,6 +73,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         mMagneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
         val addLocationIntent: Intent = Intent(this, AddLocationActivity::class.java)
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            locationStart()
+        }
+
+        directionCalculation(location)
 
         binding.transitionFab.setOnClickListener {
             startActivity(addLocationIntent)
@@ -150,7 +188,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding.southImage.rotation = -degree
     }
 
-    private fun directionCalculation() {
+    private fun directionCalculation(location: Location) {
         lateinit var db: AppDatabase
         var locationList: List<Location> = emptyList()
 
@@ -158,7 +196,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         locationList = db.locationDao().getAll()
 
         val countNumber: Int = locationList.size
-        val latitudeCurrentLocation:Double =  取得する
+        val latitudeCurrentLocation:Double =  location.latitude
+        Log.d("😘", latitudeCurrentLocation.toString())
 
         var arrayList: ArrayList<Double> = ArrayList()
 
@@ -171,5 +210,33 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
             arrayList.add(absoluteValue)
         }
+    }
+
+    private fun locationStart() {
+        Log.d("debug", "locationStart()")
+
+        // Instances of LocationManager class must be obtained using Context.getSystemService(Class)
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Log.d("debug", "location manager Enabled")
+        } else {
+            // to prompt setting up GPS
+            val settingsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(settingsIntent)
+            Log.d("debug", "not gpsEnable, startActivity")
+        }
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1000)
+
+            Log.d("debug", "checkSelfPermission false")
+            return
+        }
+
     }
 }
