@@ -33,7 +33,7 @@ class AddLocationActivity : AppCompatActivity(),
     lateinit var db: AppDatabase
 
     private var name = "名称未設定"
-    private var latitude = -1.0
+    private    var latitude = -1.0
     private var longitude = -1.0
 
     //位置情報
@@ -89,9 +89,6 @@ class AddLocationActivity : AppCompatActivity(),
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(nagoya))
         //起動時の縮尺を設定
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(nagoya, 15f))
-        //拡大・縮小ボタンを表示
-        //実機で地図の拡大がしにくいので実装。リリース時には消す
-        googleMap.uiSettings.isZoomControlsEnabled = true
 
         //長押しされた時のActionを指示
         googleMap.setOnMapLongClickListener { longpushLocation: LatLng ->

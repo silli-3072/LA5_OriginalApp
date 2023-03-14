@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -13,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
@@ -77,6 +80,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         //データベースの初期化
         db = AppDatabase.getInstance(this.applicationContext)!!
 
+        var locationList: List<Location> = emptyList()
+        locationList = db.locationDao().getAll()
+        val countNumber: Int = locationList.size
+
         val addLocationIntent: Intent = Intent(this, AddLocationActivity::class.java)
 
         if (ContextCompat.checkSelfPermission(
@@ -87,6 +94,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             locationStart()
+        }
+
+        for (i in 0..countNumber - 1) {
+            val sampleView = View(this)
+            sampleView.setBackgroundColor(Color.WHITE)
+            addContentView(sampleView, ViewGroup.LayoutParams(40, 40));
+            sampleView.setX(100.0F * 1)
+            sampleView.setY(100.0F * i)
         }
 
         binding.transitionFab.setOnClickListener {
@@ -194,12 +209,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding.southImage.rotation = -degree
     }
 
-    private fun directionCalculation(location: Location) {
-        var locationList: List<Location> = emptyList()
-
-        locationList = db.locationDao().getAll()
-
-        val countNumber: Int = locationList.size
+    private fun directionCalculation(location: Location, countNumber: Int, locationList: List<Location>) {
         val latitudeCurrentLocation: Double = location.latitude
 
         for (i in 0..countNumber - 1) {
