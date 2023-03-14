@@ -8,7 +8,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.location.LocationListener
 import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -26,10 +25,9 @@ import kotlin.math.sin
 class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
 
-    // SensorManager
+    // コンパス
     private lateinit var sensorManager: SensorManager
 
-    // Sensor
     private lateinit var mAccelerometerSensor: Sensor
     private lateinit var mMagneticFieldSensor: Sensor
 
@@ -38,6 +36,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var mMagneticFiledFlg: Boolean = false
 
+    //位置情報
     private lateinit var locationManager: LocationManager
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -49,19 +48,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         } else {
             // それでも拒否された時の対応
-            val toast = Toast.makeText(this,
-                "これ以上なにもできません", Toast.LENGTH_SHORT)
+            val toast = Toast.makeText(
+                this,
+                "これ以上なにもできません", Toast.LENGTH_SHORT
+            )
             toast.show()
 
         }
     }
 
+    //Room
+    private lateinit var db: AppDatabase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(this.root) }
-
-        val location = Location
 
         // SensorManagerのインスタンスを生成
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -72,16 +74,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // 地磁気センサーを取得する
         mMagneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
+        //データベースの初期化
+        db = AppDatabase.getInstance(this.applicationContext)!!
+
         val addLocationIntent: Intent = Intent(this, AddLocationActivity::class.java)
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             locationStart()
         }
-
-        directionCalculation(location)
 
         binding.transitionFab.setOnClickListener {
             startActivity(addLocationIntent)
@@ -189,26 +195,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun directionCalculation(location: Location) {
-        lateinit var db: AppDatabase
         var locationList: List<Location> = emptyList()
 
-        db = AppDatabase.getInstance(this.applicationContext)!!
         locationList = db.locationDao().getAll()
 
         val countNumber: Int = locationList.size
-        val latitudeCurrentLocation:Double =  location.latitude
-        Log.d("😘", latitudeCurrentLocation.toString())
+        val latitudeCurrentLocation: Double = location.latitude
 
-        var arrayList: ArrayList<Double> = ArrayList()
-
-        for (i in 0..countNumber) {
-            var latitudePoint:Double = locationList[i].latitude
+        for (i in 0..countNumber - 1) {
+            var latitudePoint: Double = locationList[i].latitude
             var latitudeDifference = latitudePoint - latitudeCurrentLocation
 
-            var directionCalculationNumber: Double = (cos(latitudePoint) * sin(latitudeDifference)) - (sin(latitudeCurrentLocation) * cos(latitudePoint) * cos(latitudeDifference)) + (cos(latitudePoint) * sin(latitudePoint))
+            var directionCalculationNumber: Double =
+                (cos(latitudePoint) * sin(latitudeDifference)) - (sin(latitudeCurrentLocation) * cos(
+                    latitudePoint
+                ) * cos(latitudeDifference)) + (cos(latitudePoint) * sin(latitudePoint))
             var absoluteValue = abs(directionCalculationNumber)
 
-            arrayList.add(absoluteValue)
         }
     }
 
@@ -229,10 +232,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             Log.d("debug", "not gpsEnable, startActivity")
         }
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1000)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1000
+            )
 
             Log.d("debug", "checkSelfPermission false")
             return
