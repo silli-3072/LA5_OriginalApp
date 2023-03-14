@@ -23,19 +23,21 @@ class AddLocationActivity : AppCompatActivity(),
     GoogleMap.OnMyLocationButtonClickListener,
     GoogleMap.OnMyLocationClickListener, OnMapReadyCallback,
     ActivityCompat.OnRequestPermissionsResultCallback {
-
     private lateinit var binding: ActivityAddLocationBinding
+
+    //マップ
     private lateinit var map: GoogleMap
-    lateinit var db: AppDatabase
-
-    private var permissionDenied = false
-
     private  var marker: Marker? = null
 
-    //保存用の地名・緯度・経度の変数
+    //Room
+    lateinit var db: AppDatabase
+
     private var name = "名称未設定"
     private var latitude = -1.0
     private var longitude = -1.0
+
+    //位置情報
+    private var permissionDenied = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

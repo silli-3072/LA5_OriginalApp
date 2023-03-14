@@ -1,23 +1,33 @@
 package com.haruta.harutyan.originalapp
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.haruta.harutyan.originalapp.databinding.ActivityMainBinding
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
 
-    // SensorManager
+    // コンパス
     private lateinit var sensorManager: SensorManager
 
-    // Sensor
     private lateinit var mAccelerometerSensor: Sensor
     private lateinit var mMagneticFieldSensor: Sensor
 
@@ -25,6 +35,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var mMagneticFieldValue: FloatArray = FloatArray(5)
 
     private var mMagneticFiledFlg: Boolean = false
+
+    //位置情報
+    private lateinit var locationManager: LocationManager
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // 使用が許可された
+            locationStart()
+
+        } else {
+            // それでも拒否された時の対応
+            val toast = Toast.makeText(
+                this,
+                "これ以上なにもできません", Toast.LENGTH_SHORT
+            )
+            toast.show()
+
+        }
+    }
+
+    //Room
+    private lateinit var db: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +74,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // 地磁気センサーを取得する
         mMagneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
+        //データベースの初期化
+        db = AppDatabase.getInstance(this.applicationContext)!!
+
         val addLocationIntent: Intent = Intent(this, AddLocationActivity::class.java)
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            locationStart()
+        }
 
         binding.transitionFab.setOnClickListener {
             startActivity(addLocationIntent)
@@ -145,5 +192,59 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun rotateCompass(degree: Float) {
         // Viewの回転方向と方位の回転方向が逆なので、マイナスをかけて反転する
         binding.southImage.rotation = -degree
+    }
+
+    private fun directionCalculation(location: Location) {
+        var locationList: List<Location> = emptyList()
+
+        locationList = db.locationDao().getAll()
+
+        val countNumber: Int = locationList.size
+        val latitudeCurrentLocation: Double = location.latitude
+
+        for (i in 0..countNumber - 1) {
+            var latitudePoint: Double = locationList[i].latitude
+            var latitudeDifference = latitudePoint - latitudeCurrentLocation
+
+            var directionCalculationNumber: Double =
+                (cos(latitudePoint) * sin(latitudeDifference)) - (sin(latitudeCurrentLocation) * cos(
+                    latitudePoint
+                ) * cos(latitudeDifference)) + (cos(latitudePoint) * sin(latitudePoint))
+            var absoluteValue = abs(directionCalculationNumber)
+
+        }
+    }
+
+    private fun locationStart() {
+        Log.d("debug", "locationStart()")
+
+        // Instances of LocationManager class must be obtained using Context.getSystemService(Class)
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Log.d("debug", "location manager Enabled")
+        } else {
+            // to prompt setting up GPS
+            val settingsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(settingsIntent)
+            Log.d("debug", "not gpsEnable, startActivity")
+        }
+
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1000
+            )
+
+            Log.d("debug", "checkSelfPermission false")
+            return
+        }
+
     }
 }
